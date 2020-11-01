@@ -1,25 +1,30 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+
+import QnaProvider from './providers/QnaProvider'
+import Qna from './components/Qna'
+import Result from './components/Result'
+import './App.css'
+
+let result = () => <Result></Result>
+let quiz = () => <QnaProvider>
+  <div className="App">
+    <Qna></Qna>
+  </div>
+</QnaProvider>
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Route path="/" exact component={quiz} />
+      <Route path="/result" component={result} />
+    </Router>
+
   );
 }
 
