@@ -1,69 +1,93 @@
-import React, { useContext, useEffect } from 'react'
-import classNames from 'classnames'
-import QnaContext from '../contexts/QnaContext'
-import Question from './Question'
-import Option from './Option'
-import './Qna.css'
+import React, { useContext } from 'react';
+import QnaContext from '../contexts/QnaContext';
+import Option from './Option';
+import './Qna.css';
+import Question from './Question';
+import Result from './Result';
 
 export default function (props) {
     let { qnas,
-        currentQna, setCurrentQna,
+        currentQnaIndex, setCurrentQnaIndex,
+        qnaStatus, setQnaStatus,
         score, setScore,
-        isAnswered, setIsAnswered } = useContext(QnaContext)
+        selectedIndex, setSelectedIndex,
+        isCompleted, setIsCompleted } = useContext(QnaContext)
 
-    let handleOptionClick = (option) => {
-        if (option.isCorrect) setScore(score + 1)
-        setIsAnswered(true)
+    let handleOptionClick = (optionData, optionIndex) => {
+        setSelectedIndex(optionIndex)
+        if (optionData.isCorrect) {
+            setQnaStatus(1)
+            setScore(score + 1)
+        }
+        else {
+            setQnaStatus(0)
+        }
     }
 
     let handleNextClick = function () {
-        if (currentQna < qnas.length - 1) {
-            setCurrentQna(currentQna + 1)
-            setIsAnswered(false)
+        setSelectedIndex(-1)
+        if (currentQnaIndex < qnas.length - 1) {
+            setCurrentQnaIndex(currentQnaIndex + 1)
+            setSelectedIndex(-1)
+            setQnaStatus(-1)
         }
         else {
-            alert(`Your score: ${score}/${qnas.length}`)
+            setIsCompleted(true)
         }
-
     }
 
-    useEffect(() => {
-        console.log('Mounted')
-    }, [])
-    
-    if (!qnas || qnas.length === 0) return (null)
+    if (!qnas || qnas.length === 0) return (
+        <div className="loader">
+            
+        </div>)
+    if (isCompleted) return (
+        <Result
+            data={{ correct: score, wrong: qnas.length - score }}>
+        </Result>)
     return (<div className="Qna">
         <Question
-            value={qnas[currentQna].question}>
+            value={`Question ${currentQnaIndex + 1}/${qnas.length}: ${qnas[currentQnaIndex].question}`}
+        >
         </Question>
         <div className="options-group">
             {
-                isAnswered ?
-                    qnas[currentQna].options.map((x, index) => <Option
+                qnaStatus === -1 ?
+                    //Chua tra loi
+                    qnas[currentQnaIndex].options.map((x, index) => <Option
                         key={index}
-                        className={classNames('Option', {
-                            correct: x.isCorrect
-                        })}
-                        data={x}>
+                        data={x}
+                        index={index}
+                        handleOptionClick={handleOptionClick}
+                    >
                     </Option>)
                     :
-                    qnas[currentQna].options.map((x, index) => <Option
-                        key={index}
-                        handleOptionClick={handleOptionClick}
-                        data={x}>
-                    </Option>)
+                    ((qnaStatus === 0) ?
+                        //Sai
+                        qnas[currentQnaIndex].options.map((x, index) => <Option
+                            key={index}
+                            data={x}
+                            index={index}
+                            isSelected={index === selectedIndex}>
+                        </Option>)
+                        :
+                        //Dung
+                        qnas[currentQnaIndex].options.map((x, index) => <Option
+                            data={x}
+                            key={index}
+                            index={index}
+                        >
+                        </Option>)
+                    )
             }
-
         </div>
         <div>
-            Question: {currentQna + 1} / {qnas.length}
+
         </div>
         {
-            isAnswered &&
+            qnaStatus !== -1 &&
             <div className="button-group">
-
                 <button className="next" onClick={() => handleNextClick()}>
-                    {currentQna === qnas.length - 1 ? 'Finish' : 'Next'}
+                    {currentQnaIndex === qnas.length - 1 ? 'Finish' : 'Next'}
                 </button>
             </div>
         }

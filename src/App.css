@@ -6,8 +6,8 @@
 .App {
   text-align: center;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 @media (prefers-reduced-motion: no-preference) {
